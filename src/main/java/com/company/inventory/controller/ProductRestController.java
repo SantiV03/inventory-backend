@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,13 +23,13 @@ import com.company.inventory.util.Util;
 @RequestMapping("/api/v1")
 public class ProductRestController {
 	
-	private IProductService procutService;
+	private IProductService productService;
 	
 	
 	
-	public ProductRestController(IProductService procutService) {
+	public ProductRestController(IProductService productService) {
 		super();
-		this.procutService = procutService;
+		this.productService = productService;
 	}
 
 
@@ -48,10 +50,23 @@ public class ProductRestController {
 				product.setPrice(price);
 				product.setPicture(Util.compressZLib(picture.getBytes()));
 				
-				ResponseEntity<ProductResponseRest> response = procutService.save(product, categoryID);
+				ResponseEntity<ProductResponseRest> response = productService.save(product, categoryID);
 				
 				
 				return response;
+		
+	}
+	
+	
+	/**
+	 * buscar producto por ID
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/products/{id}") 
+	public ResponseEntity<ProductResponseRest> searchById(@PathVariable Long id){
+		ResponseEntity<ProductResponseRest> response = productService.searchById(id);
+		return response;
 		
 	}
 

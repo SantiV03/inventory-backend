@@ -18,5 +18,5 @@ public interface IProductService {
 	
 	public ResponseEntity<ProductResponseRest> deleteById(long id);
 		
-
+	public ResponseEntity<ProductResponseRest> search();
 }

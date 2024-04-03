@@ -37,11 +37,11 @@ public class Product implements Serializable {
 	private Category category;
 	
 	
-	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name="picture", columnDefinition = "longblob")
-	private byte[] picture;
+	@Column(name="picture")
+	private String picture;
 	
 
+	
 }
 

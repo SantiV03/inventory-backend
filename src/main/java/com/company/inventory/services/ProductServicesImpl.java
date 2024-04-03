@@ -13,6 +13,7 @@ import com.company.inventory.dao.ICategoryDao;
 import com.company.inventory.dao.IProductDao;
 import com.company.inventory.model.Category;
 import com.company.inventory.model.Product;
+import com.company.inventory.response.ProductResponse;
 import com.company.inventory.response.ProductResponseRest;
 import com.company.inventory.response.ResponceRest;
 import com.company.inventory.util.Util;
@@ -89,8 +90,8 @@ public class ProductServicesImpl implements IProductService {
 			
 			if (product.isPresent()) {
 				
-				byte[] imageDescompressed = Util.decompressZLib(product.get().getPicture());
-				product.get().setPicture(imageDescompressed);
+				//byte[] imageDescompressed = Util.decompressZLib(product.get().getPicture());
+				//product.get().setPicture(imageDescompressed);
 				list.add(product.get());
 				response.getProduct().setProducts(list);
 				response.setMetadata("respuesta positiva", "00", "Producto encontrado");
@@ -121,20 +122,19 @@ public class ProductServicesImpl implements IProductService {
 		
 		ProductResponseRest response =new ProductResponseRest();
 		List<Product> list = new ArrayList<>();
-		List<Product> listAux = new ArrayList<>();
 		
 		try {
 			
 			//buscar productos por Nombre
-			listAux = productDao.findByNameContainingIgnoreCase(name);
+			list = productDao.findByNameContainingIgnoreCase(name);
 			
-			if (listAux.size() > 0) {
+			if (list.size() > 0) {
 				
-				listAux.stream().forEach( (p) -> {
+				/*listAux.stream().forEach( (p) -> {
 					byte[] imageDescompressed = Util.decompressZLib(p.getPicture());
 					p.setPicture(imageDescompressed);
 					list.add(p);
-				});
+				});*/
 				
 				
 				response.getProduct().setProducts(list);
@@ -188,21 +188,19 @@ public class ProductServicesImpl implements IProductService {
 	@Transactional
 	public ResponseEntity<ProductResponseRest> search() {
 	    List<Product> list = new ArrayList<>();
-	    List<Product> listAux = new ArrayList<>();
-
 	    
 	    ProductResponseRest response = new ProductResponseRest();
 
 	    try {
 	        // Buscar productos
-	        listAux = (List<Product>) productDao.findAll();
+	        list = (List<Product>) productDao.findAll();
 
-	        if (listAux.size() > 0) {
-	            listAux.forEach((p) -> {
+	        if (list.size() > 0) {
+	        	 /* listAux.forEach((p) -> {
 	                byte[] imageDescompressed = Util.decompressZLib(p.getPicture());
 	                p.setPicture(imageDescompressed);
 	                list.add(p);
-	            });
+	            }); */
 
 	            
 	            response.getProduct().setProducts(list);
@@ -211,6 +209,9 @@ public class ProductServicesImpl implements IProductService {
 	        } else {
 	            response.setMetadata("respuesta negativa", "-1", "Producto no encontrado");
 	            return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+	        	//ProductResponse productResponse = new ProductResponse();
+	        	//productResponse.setProducts(new ArrayList<>());
+	        	//response.setProduct(productResponse);
 	        }
 
 	    } catch (Exception e) {

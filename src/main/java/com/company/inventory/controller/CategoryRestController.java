@@ -1,5 +1,7 @@
 package com.company.inventory.controller;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,13 +12,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.company.inventory.model.Category;
 import com.company.inventory.response.CategoryResponseRest;
 import com.company.inventory.services.ICategoryService;
+import com.company.inventory.util.CategoryExcelExporter;
 
-@CrossOrigin(origins = "http://localhost:4200") 
+import jakarta.servlet.http.HttpServletResponse;
+
+@CrossOrigin(origins = "*") 
+//@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @RestController
 @RequestMapping("/api/v1")
 public class CategoryRestController {
@@ -48,8 +55,7 @@ public class CategoryRestController {
 		ResponseEntity<CategoryResponseRest> response = service.searchById(id);
 		return response;
 		
-	}
-
+	} 
 
 /**
  * Save categories  
@@ -85,6 +91,31 @@ public ResponseEntity<CategoryResponseRest> delete(@PathVariable Long id) {
 	return response;
 
 }
+
+
+/**
+ * Export a Excel  
+ * @return
+ */
+@GetMapping("/categories/export/excel")
+public void exporToExcel(HttpServletResponse response) throws IOException {
+	response.setContentType("application/octet-stream");
+	
+	String headerKey = "Content-Disposition";
+	String headerValue = "attachment; filename=result_category.xlsx";
+	response.setHeader(headerKey, headerValue);
+	
+	ResponseEntity<CategoryResponseRest> categoryResponse = service.search();
+	
+	
+	CategoryExcelExporter excelExporter = new CategoryExcelExporter(
+			categoryResponse.getBody().getCategoryResponse().getCategory());
+	
+	excelExporter.export(response);
+	
+	
+}
+
 }
 
 

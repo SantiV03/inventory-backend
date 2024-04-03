@@ -1,6 +1,7 @@
 package com.company.inventory.controller;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,17 +11,23 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.company.inventory.model.Product;
+import com.company.inventory.response.CategoryResponseRest;
 import com.company.inventory.response.ProductResponseRest;
 import com.company.inventory.services.IProductService;
+import com.company.inventory.util.CategoryExcelExporter;
+import com.company.inventory.util.ProductExcelExport;
 import com.company.inventory.util.Util;
 
+import jakarta.servlet.http.HttpServletResponse;
 
-@CrossOrigin(origins = {"http://localhost:4200"} )
+@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST,RequestMethod.PUT,RequestMethod.DELETE})
 @RestController
 @RequestMapping("/api/v1")
 public class ProductRestController {
@@ -50,7 +57,7 @@ public class ProductRestController {
 				product.setName(name);
 				product.setAccount(aacount);
 				product.setPrice(price);
-				product.setPicture(Util.compressZLib(picture.getBytes()));
+				product.setPicture(Base64.getEncoder().encodeToString(picture.getBytes()));
 				
 				ResponseEntity<ProductResponseRest> response = productService.save(product, categoryID);
 				
@@ -129,12 +136,36 @@ public class ProductRestController {
 				product.setName(name);
 				product.setAccount(aacount);
 				product.setPrice(price);
-				product.setPicture(Util.compressZLib(picture.getBytes()));
+				product.setPicture(Base64.getEncoder().encodeToString(picture.getBytes()));
 				
 				ResponseEntity<ProductResponseRest> response = productService.update(product, categoryID, id);
 				
 				
 				return response;
+				
+	}
+	
+	/**
+	 * Exportar a excel
+	 * 
+	 */
+	
+	@GetMapping("/products/export/excel")
+	public void exporToExcel(HttpServletResponse response) throws IOException {
+		response.setContentType("application/octet-stream");
+		
+		String headerKey = "Content-Disposition";
+		String headerValue = "attachment; filename=result_product.xlsx";
+		response.setHeader(headerKey, headerValue);
+		
+		ResponseEntity<ProductResponseRest> products = productService.search();
+		
+		
+		ProductExcelExport excelExporter = new ProductExcelExport(
+				products.getBody().getProduct().getProducts());
+		
+		excelExporter.export(response);
+		
 		
 	}
 
